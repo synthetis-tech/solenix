@@ -419,17 +419,18 @@ func (db *DB) bgLoop() {
 Параметры WAL и шардирования задаются в `config.yaml`:
 
 ```yaml
-data_dir: ~/solenix/data      # директория для data/wal/ и data/chunks/
-wal_max_size: 33554432      # 32 MiB — ротация по размеру
-flush_interval: 2m          # принудительный flush в chunks
-retention: 720h             # 30 дней; 0 — без ограничения
+wal_max_size: 32        # MiB — ротация по размеру
+flush_interval: 2m      # принудительный flush в chunks
+retention: 720h         # 30 дней; 0 — без ограничения
 ```
+
+> `data_dir` не конфигурируется через YAML — всегда фиксирован на `~/.solenix/data`.
 
 Значения по умолчанию (`internal/config/config.go`):
 
 | Параметр | Default | Описание |
 |---|---|---|
-| `DataDir` | `~/solenix/data` | корневая директория данных |
+| `DataDir` | `~/.solenix/data` | корневая директория данных (не изменяется через конфиг) |
 | `WALMaxSize` | 32 MiB | максимальный размер WAL сегмента |
 | `FlushInterval` | 2 минуты | интервал flush in chunks |
 | `RetentionDuration` | 0 (нет) | срок хранения точек |
