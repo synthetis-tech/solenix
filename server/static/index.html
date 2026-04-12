@@ -246,6 +246,22 @@
     .detail-table tr:hover td { background: rgba(255,255,255,.02); }
     .detail-loading { padding: 40px; text-align: center; color: var(--muted); font-size: 13px; }
 
+    /* Aggregation controls */
+    .agg-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .agg-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .agg-select {
+      background: var(--bg); border: 1px solid var(--border); color: var(--text);
+      padding: 3px 8px; border-radius: 5px; font-size: 12px; cursor: pointer; outline: none;
+      transition: border-color .15s;
+    }
+    .agg-select:focus { border-color: var(--accent); }
+    .agg-hint { font-size: 11px; color: var(--muted); margin-left: 2px; }
+
     /* Chart area */
     .detail-chart-wrap {
       padding: 12px 16px 14px;
@@ -380,6 +396,18 @@
     <button class="detail-close" id="detail-close">✕</button>
   </div>
   <div class="detail-meta" id="detail-meta"></div>
+  <div class="agg-bar">
+    <span class="agg-label">Agg</span>
+    <select class="agg-select" id="agg-fn">
+      <option value="">none (raw)</option>
+      <option value="avg">avg</option>
+      <option value="min">min</option>
+      <option value="max">max</option>
+      <option value="sum">sum</option>
+      <option value="count">count</option>
+    </select>
+    <span class="agg-hint" id="agg-hint"></span>
+  </div>
   <div class="detail-chart-wrap" id="detail-chart-wrap" style="display:none">
     <canvas id="detail-chart" height="120"></canvas>
   </div>
@@ -813,23 +841,52 @@
     });
   }
 
-  function openDetail(metric, labels) {
-    detailTitle.textContent = metric;
+  const aggFnEl   = document.getElementById('agg-fn');
+  const aggHintEl = document.getElementById('agg-hint');
 
-    const tags = Object.entries(labels);
-    detailMeta.innerHTML = tags.length
-      ? tags.map(([k, v]) => `<span class="tag">${esc(k)}=<b>${esc(v)}</b></span>`).join('')
-      : '<span style="color:var(--muted)">no labels</span>';
+  // Returns the aggregation bucket window that makes sense for the current time range.
+  // E.g. last 5m → 10s buckets, last 24h → 30m buckets.
+  function autoWindow() {
+    const ms = RANGES[currentRange]?.ms || 0;
+    if (!ms)           return '1h';   // all time
+    if (ms <=  5 * 60e3) return '10s';
+    if (ms <= 15 * 60e3) return '30s';
+    if (ms <= 30 * 60e3) return '1m';
+    if (ms <=  1 * 3600e3) return '2m';
+    if (ms <=  6 * 3600e3) return '10m';
+    if (ms <= 12 * 3600e3) return '20m';
+    if (ms <= 24 * 3600e3) return '30m';
+    if (ms <=  7 * 86400e3) return '3h';
+    return '6h';
+  }
+
+  let currentDetailMetric = null;
+  let currentDetailLabels = null;
+
+  function fetchDetail() {
+    const metric = currentDetailMetric;
+    const labels = currentDetailLabels;
+    if (!metric) return;
 
     detailBody.innerHTML = '<div class="detail-loading">Loading…</div>';
     detailChartWrap.style.display = 'none';
-    detail.classList.add('open');
 
+    const tags = Object.entries(labels);
     const { fromNs, toNs } = getTimeRange();
     const qp = new URLSearchParams({ metric });
     for (const [k, v] of tags) qp.append('labels', `${k}=${v}`);
     if (fromNs) qp.set('from', Math.round(fromNs).toString());
     if (toNs)   qp.set('to',   Math.round(toNs).toString());
+
+    const fn = aggFnEl.value;
+    if (fn) {
+      const win = autoWindow();
+      qp.set('agg', fn);
+      qp.set('window', win);
+      aggHintEl.textContent = `· ${win} buckets`;
+    } else {
+      aggHintEl.textContent = '';
+    }
 
     fetch(`/api/query?${qp}`)
       .then(r => r.json())
@@ -884,7 +941,26 @@
     if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
   }
 
+  function openDetail(metric, labels) {
+    currentDetailMetric = metric;
+    currentDetailLabels = labels;
+
+    detailTitle.textContent = metric;
+
+    const tags = Object.entries(labels);
+    detailMeta.innerHTML = tags.length
+      ? tags.map(([k, v]) => `<span class="tag">${esc(k)}=<b>${esc(v)}</b></span>`).join('')
+      : '<span style="color:var(--muted)">no labels</span>';
+
+    detail.classList.add('open');
+    fetchDetail();
+  }
+
   detailClose.addEventListener('click', closeDetail);
+
+  aggFnEl.addEventListener('change', () => {
+    if (currentDetailMetric) fetchDetail();
+  });
 
   document.getElementById('tbody').addEventListener('click', e => {
     const tr = e.target.closest('tr[data-metric]');

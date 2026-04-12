@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	solenix "github.com/bbvtaev/solenix"
 )
@@ -76,7 +77,22 @@ func (h *HTTPServer) handleQuery(w http.ResponseWriter, r *http.Request) {
 		labels[k] = v
 	}
 
-	results, err := h.db.Query(metric, labels, from, to, nil)
+	var opts *solenix.QueryOptions
+	if window := r.URL.Query().Get("window"); window != "" {
+		dur, err := time.ParseDuration(window)
+		if err != nil {
+			http.Error(w, `{"error":"invalid window duration"}`, http.StatusBadRequest)
+			return
+		}
+		agg, err := solenix.ParseAggType(r.URL.Query().Get("agg"))
+		if err != nil {
+			http.Error(w, `{"error":"invalid agg, expected avg/min/max/sum/count"}`, http.StatusBadRequest)
+			return
+		}
+		opts = &solenix.QueryOptions{Window: dur, Agg: agg}
+	}
+
+	results, err := h.db.Query(metric, labels, from, to, opts)
 	if err != nil {
 		http.Error(w, fmt.Sprintf(`{"error":%q}`, err.Error()), http.StatusBadRequest)
 		return
