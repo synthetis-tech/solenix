@@ -19,12 +19,12 @@ If no config is provided, all defaults are used.
 database: "default"
 
 # gRPC server address.
-# Default: ":8731"
-grpc_addr: ":8731"
+# Default: 8731
+grpc_addr: 8731
 
 # HTTP server address (UI + REST API). Set to "" to disable.
-# Default: ":8080"
-http_addr: ":8080"
+# Default: 8080
+http_addr: 8080
 
 # WAL segment size in MiB. When a segment reaches this size it is
 # rotated and flushed to chunk files immediately.

@@ -16,15 +16,15 @@ import (
 type Config struct {
 	// Storage
 	DataDir             string        // fixed: ~/.solenix/data; overridable in tests
-	Database            string        `yaml:"database"`           // database name; default "default"
-	WALMaxSize          int64         `yaml:"wal_max_size"`       // bytes; default 32 MiB
+	Database            string        `yaml:"database"`     // database name; default "default"
+	WALMaxSize          int64         `yaml:"wal_max_size"` // bytes; default 32 MiB
 	RetentionDuration   time.Duration `yaml:"retention"`
-	FlushInterval       time.Duration `yaml:"flush_interval"`     // chunk flush interval; default 2m
+	FlushInterval       time.Duration `yaml:"flush_interval"`       // chunk flush interval; default 2m
 	CompactionThreshold int           `yaml:"compaction_threshold"` // chunk files per metric before compaction; default 10
 
 	// Server
-	GRPCAddr string `yaml:"grpc_addr"`
-	HTTPAddr string `yaml:"http_addr"`
+	GRPCAddr int64 `yaml:"grpc_addr"`
+	HTTPAddr int64 `yaml:"http_addr"`
 
 	// Collector
 	Collector model.CollectorConfig `yaml:"collector"`
@@ -37,8 +37,8 @@ type rawConfig struct {
 	WALMaxSize    int64  `yaml:"wal_max_size"`
 	Retention     string `yaml:"retention"`
 	FlushInterval string `yaml:"flush_interval"`
-	GRPCAddr      string `yaml:"grpc_addr"`
-	HTTPAddr      string `yaml:"http_addr"`
+	GRPCAddr      int64  `yaml:"grpc_addr"`
+	HTTPAddr      int64  `yaml:"http_addr"`
 	Collector     struct {
 		Enabled  bool   `yaml:"enabled"`
 		Interval string `yaml:"interval"`
@@ -65,10 +65,10 @@ func LoadConfig(path string) (Config, error) {
 	if raw.WALMaxSize > 0 {
 		cfg.WALMaxSize = raw.WALMaxSize << 20 // MiB → bytes
 	}
-	if raw.GRPCAddr != "" {
+	if raw.GRPCAddr > 0 {
 		cfg.GRPCAddr = raw.GRPCAddr
 	}
-	if raw.HTTPAddr != "" {
+	if raw.HTTPAddr > 0 {
 		cfg.HTTPAddr = raw.HTTPAddr
 	}
 	if raw.Retention != "" {
@@ -103,8 +103,8 @@ func DefaultConfig() Config {
 		DataDir:             defaultDataDir(),
 		Database:            "default",
 		WALMaxSize:          32 << 20, // 32 MiB
-		GRPCAddr:            ":8731",
-		HTTPAddr:            ":8080",
+		GRPCAddr:            8731,
+		HTTPAddr:            8080,
 		FlushInterval:       2 * time.Minute,
 		CompactionThreshold: 10,
 		Collector: model.CollectorConfig{

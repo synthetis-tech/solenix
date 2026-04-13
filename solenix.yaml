@@ -1,9 +1,9 @@
 # solenix.yaml — конфигурация solenix-core сервера
 # Запуск: solenix serve --config solenix.yaml
 
-grpc_addr: ":8731"
+grpc_addr: 8731
 
-http_addr: ":8080"
+http_addr: 8080
 
 database: "default"
 

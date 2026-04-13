@@ -80,8 +80,11 @@ func Open(config cfg.Config) (*DB, error) {
 	if config.FlushInterval == 0 {
 		config.FlushInterval = def.FlushInterval
 	}
-	if config.GRPCAddr == "" {
+	if config.GRPCAddr == 0 {
 		config.GRPCAddr = def.GRPCAddr
+	}
+	if config.HTTPAddr == 0 {
+		config.HTTPAddr = def.HTTPAddr
 	}
 
 	// Ensure data root exists and verify the on-disk format version.
