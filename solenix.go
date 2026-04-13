@@ -4,9 +4,9 @@
 package solenix
 
 import (
-	"github.com/bbvtaev/solenix/internal/config"
-	"github.com/bbvtaev/solenix/internal/model"
-	"github.com/bbvtaev/solenix/internal/storage"
+	"github.com/synthetis-tech/solenix/internal/config"
+	"github.com/synthetis-tech/solenix/internal/model"
+	"github.com/synthetis-tech/solenix/internal/storage"
 )
 
 type (

@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/bbvtaev/solenix/internal/model"
+	"github.com/synthetis-tech/solenix/internal/model"
 )
 
 const versionGorilla byte = 0x02

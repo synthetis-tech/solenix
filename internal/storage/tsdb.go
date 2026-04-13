@@ -12,10 +12,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/bbvtaev/solenix/internal/chunk"
-	cfg "github.com/bbvtaev/solenix/internal/config"
-	"github.com/bbvtaev/solenix/internal/model"
-	"github.com/bbvtaev/solenix/internal/wal"
+	"github.com/synthetis-tech/solenix/internal/chunk"
+	cfg "github.com/synthetis-tech/solenix/internal/config"
+	"github.com/synthetis-tech/solenix/internal/model"
+	"github.com/synthetis-tech/solenix/internal/wal"
 )
 
 const walSyncInterval = 100 * time.Millisecond
@@ -80,8 +80,11 @@ func Open(config cfg.Config) (*DB, error) {
 	if config.FlushInterval == 0 {
 		config.FlushInterval = def.FlushInterval
 	}
-	if config.GRPCAddr == "" {
+	if config.GRPCAddr == 0 {
 		config.GRPCAddr = def.GRPCAddr
+	}
+	if config.HTTPAddr == 0 {
+		config.HTTPAddr = def.HTTPAddr
 	}
 
 	// Ensure data root exists and verify the on-disk format version.

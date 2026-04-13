@@ -1,4 +1,4 @@
-module github.com/bbvtaev/solenix
+module github.com/synthetis-tech/solenix
 
 go 1.25.0
 

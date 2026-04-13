@@ -13,7 +13,6 @@ var rootCmd = &cobra.Command{
 	CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
 }
 
-// --addr флаг доступен во всех subcommand-ах кроме serve
 var serverAddr string
 
 func init() {

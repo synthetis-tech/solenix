@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
-	solenix "github.com/bbvtaev/solenix"
-	"github.com/bbvtaev/solenix/collector"
-	"github.com/bbvtaev/solenix/server"
+	"github.com/synthetis-tech/solenix"
+	"github.com/synthetis-tech/solenix/collector"
+	"github.com/synthetis-tech/solenix/internal/server"
 	"github.com/spf13/cobra"
 )
 
@@ -55,17 +56,17 @@ func runServe(_ *cobra.Command, _ []string) error {
 	srv := server.New(db)
 	go func() {
 		slog.Info("gRPC server listening", "addr", cfg.GRPCAddr)
-		if err := srv.Listen(cfg.GRPCAddr); err != nil {
+		if err := srv.Listen(fmt.Sprintf(":%d", cfg.GRPCAddr)); err != nil {
 			slog.Error("gRPC server error", "err", err)
 			os.Exit(1)
 		}
 	}()
 
-	if cfg.HTTPAddr != "" {
+	if cfg.HTTPAddr != 0 {
 		httpSrv := server.NewHTTP(db, cfg)
 		go func() {
-			slog.Info("UI available", "url", "http://localhost"+cfg.HTTPAddr)
-			if err := httpSrv.ListenHTTP(cfg.HTTPAddr); err != nil {
+			slog.Info("UI available", "url", "http://localhost"+fmt.Sprintf(":%d", cfg.HTTPAddr))
+			if err := httpSrv.ListenHTTP(fmt.Sprintf(":%d", cfg.HTTPAddr)); err != nil {
 				slog.Error("HTTP server error", "err", err)
 			}
 		}()

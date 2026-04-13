@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bbvtaev/solenix/internal/model"
+	"github.com/synthetis-tech/solenix/internal/model"
 )
 
 // Manager controls numbered WAL segments.

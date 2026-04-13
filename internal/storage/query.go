@@ -7,8 +7,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/bbvtaev/solenix/internal/chunk"
-	"github.com/bbvtaev/solenix/internal/model"
+	"github.com/synthetis-tech/solenix/internal/chunk"
+	"github.com/synthetis-tech/solenix/internal/model"
 )
 
 // Query возвращает серии по метрике и лейблам в диапазоне [from, to].

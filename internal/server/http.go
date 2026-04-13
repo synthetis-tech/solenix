@@ -11,13 +11,13 @@ import (
 	"strings"
 	"time"
 
-	solenix "github.com/bbvtaev/solenix"
+	solenix "github.com/synthetis-tech/solenix"
 )
 
 //go:embed static
 var staticFiles embed.FS
 
-// HTTPServer отдаёт embedded UI и REST API для self-hosted режима.
+// HTTPServer serves embedded UI and REST API for self-hosted mode.
 type HTTPServer struct {
 	db      *solenix.DB
 	cfg     solenix.Config
@@ -28,7 +28,7 @@ func NewHTTP(db *solenix.DB, cfg solenix.Config) *HTTPServer {
 	return &HTTPServer{db: db, cfg: cfg, version: solenix.Version}
 }
 
-// ListenHTTP запускает HTTP сервер на заданном адресе (например, ":8080").
+// ListenHTTP starts HTTP server on the given address (e.g., ":8080").
 func (h *HTTPServer) ListenHTTP(addr string) error {
 	mux := http.NewServeMux()
 

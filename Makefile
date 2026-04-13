@@ -1,6 +1,6 @@
 GO      ?= go
 PKG     := ./...
-MOD     := github.com/bbvtaev/solenix-core
+MOD     := github.com/synthetis-tech/solenix
 BINARY  := solenix
 PROTO   := api/proto/solenix.proto
 
