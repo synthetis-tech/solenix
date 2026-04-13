@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	solenix "github.com/bbvtaev/solenix"
+	solenix "github.com/synthetis-tech/solenix"
 )
 
 //go:embed static

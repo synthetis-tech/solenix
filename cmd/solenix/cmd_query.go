@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bbvtaev/solenix/internal/queryparser"
-	sdk "github.com/bbvtaev/solenix/sdk/go"
+	"github.com/synthetis-tech/solenix/internal/queryparser"
+	sdk "github.com/synthetis-tech/solenix/sdk/go"
 	"github.com/spf13/cobra"
 )
 

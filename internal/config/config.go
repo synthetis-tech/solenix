@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/bbvtaev/solenix/internal/model"
+	"github.com/synthetis-tech/solenix/internal/model"
 	"gopkg.in/yaml.v3"
 )
 

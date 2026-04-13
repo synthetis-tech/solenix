@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	solenix "github.com/bbvtaev/solenix"
+	solenix "github.com/synthetis-tech/solenix"
 )
 
 func newTestDB(t *testing.T) *solenix.DB {

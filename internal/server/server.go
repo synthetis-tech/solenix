@@ -6,8 +6,8 @@ import (
 	"net"
 	"time"
 
-	solenix "github.com/bbvtaev/solenix"
-	pb "github.com/bbvtaev/solenix/api/proto"
+	solenix "github.com/synthetis-tech/solenix"
+	pb "github.com/synthetis-tech/solenix/api/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

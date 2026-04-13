@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	sdk "github.com/bbvtaev/solenix/sdk/go"
+	sdk "github.com/synthetis-tech/solenix/sdk/go"
 	"github.com/spf13/cobra"
 )
 

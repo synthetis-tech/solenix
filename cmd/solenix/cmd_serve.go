@@ -8,9 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/bbvtaev/solenix"
-	"github.com/bbvtaev/solenix/collector"
-	"github.com/bbvtaev/solenix/internal/server"
+	"github.com/synthetis-tech/solenix"
+	"github.com/synthetis-tech/solenix/collector"
+	"github.com/synthetis-tech/solenix/internal/server"
 	"github.com/spf13/cobra"
 )
 

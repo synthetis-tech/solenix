@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	solenix "github.com/bbvtaev/solenix"
+	solenix "github.com/synthetis-tech/solenix"
 )
 
 // TestChunkFlush проверяет полный цикл: Write → flushToChunks → restart → Query.

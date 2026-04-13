@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/bbvtaev/solenix/internal/model"
+	"github.com/synthetis-tech/solenix/internal/model"
 )
 
 // Compact проверяет все поддиректории chunksDir и сливает файлы метрики
