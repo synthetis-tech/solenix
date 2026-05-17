@@ -16,8 +16,8 @@ import (
 type Query struct {
 	Metric string
 	Labels map[string]string
-	From   int64 // Unix nanoseconds, 0 = без ограничения
-	To     int64 // Unix nanoseconds, 0 = без ограничения (всегда now если есть From)
+	From   int64
+	To     int64
 }
 
 // Parse разбирает строку запроса и возвращает Query.

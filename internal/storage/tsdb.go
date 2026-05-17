@@ -425,10 +425,8 @@ func (db *DB) applyRecord(rec model.Record) {
 func (db *DB) enforceRetention() {
 	cutoff := time.Now().Add(-db.config.RetentionDuration).UnixNano()
 
-	// 1. Удаляем полностью устаревшие chunk-файлы (max_ts < cutoff)
 	db.deleteExpiredChunks(cutoff)
 
-	// 2. Вычищаем устаревшие точки из горячего буфера
 	for i := range db.shards {
 		sh := &db.shards[i]
 		sh.mu.Lock()

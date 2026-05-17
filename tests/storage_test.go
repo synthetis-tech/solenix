@@ -34,7 +34,7 @@ func TestChunkFlush(t *testing.T) {
 	}
 
 	// Проверяем что chunks появились на диске
-	chunksDir := filepath.Join(dir, "chunks", "cpu_usage")
+	chunksDir := filepath.Join(dir, "default", "chunks", "cpu_usage")
 	entries, err := os.ReadDir(chunksDir)
 	if err != nil {
 		t.Fatalf("ReadDir chunks: %v", err)
@@ -131,7 +131,7 @@ func TestMultiMetricChunks(t *testing.T) {
 
 	// Проверяем директории chunks
 	for _, metric := range []string{"cpu", "mem", "disk"} {
-		metricDir := filepath.Join(dir, "chunks", metric)
+		metricDir := filepath.Join(dir, "default", "chunks", metric)
 		entries, err := os.ReadDir(metricDir)
 		if err != nil {
 			t.Fatalf("ReadDir %s: %v", metric, err)

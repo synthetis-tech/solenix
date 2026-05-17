@@ -16,5 +16,4 @@ compaction_threshold: 10
 retention: "720h"
 
 collector:
-  enabled: true
-  interval: "1s"
+  enabled: false

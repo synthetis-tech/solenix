@@ -46,7 +46,7 @@ func (w *bitWriter) bytes() []byte {
 // bitReader читает биты MSB-first из байтового среза.
 type bitReader struct {
 	buf   []byte
-	pos   int   // следующий байт для загрузки
+	pos   int // следующий байт для загрузки
 	cur   byte
 	nBits uint8 // оставшихся бит в cur
 }
@@ -187,7 +187,6 @@ func encodeValue(w *bitWriter, valBits uint64, st *xorState) {
 
 	if !st.hasBlock || leading < st.prevLeading || trailing < st.prevTrailing {
 		w.writeBit(true) // новый блок
-		// 5 бит могут хранить 0..31; cap leading чтобы не выйти за границу
 		if leading > 31 {
 			leading = 31
 		}
