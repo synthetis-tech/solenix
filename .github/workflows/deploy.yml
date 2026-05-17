@@ -10,14 +10,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Login to GitLab Registry
-        run: echo "${{ secrets.CI_REGISTRY_PASSWORD }}" | docker login registry.gitlab.com -u ${{ secrets.CI_REGISTRY_USER }} --password-stdin
+      - name: Login to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build and push
         run: |
-          docker build -t registry.gitlab.com/synthetis-tech/solenix-core:${{ github.sha }} -t registry.gitlab.com/synthetis-tech/solenix-core:latest .
-          docker push registry.gitlab.com/synthetis-tech/solenix-core:${{ github.sha }}
-          docker push registry.gitlab.com/synthetis-tech/solenix-core:latest
+          IMAGE=ghcr.io/synthetis-tech/solenix-core
+          docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:latest .
+          docker push $IMAGE:${{ github.sha }}
+          docker push $IMAGE:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -30,5 +31,5 @@ jobs:
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG_CONTENT }}" > ~/.kube/config
-          kubectl set image deployment/core core=registry.gitlab.com/synthetis-tech/solenix-core:${{ github.sha }} -n solenix
+          kubectl set image deployment/core core=ghcr.io/synthetis-tech/solenix-core:${{ github.sha }} -n solenix
           kubectl rollout status deployment/core -n solenix
