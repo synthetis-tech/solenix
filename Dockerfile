@@ -17,4 +17,4 @@ COPY --from=builder /app/bin/solenix /usr/local/bin/solenix
 EXPOSE 8731 8080
 
 ENTRYPOINT ["/usr/local/bin/solenix"]
-CMD ["serve"]
+CMD ["serve", "--config", "/etc/solenix/solenix.yaml"]

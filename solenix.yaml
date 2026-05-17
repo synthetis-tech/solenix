@@ -5,7 +5,7 @@ grpc_addr: 8731
 
 http_addr: 8080
 
-database: "default"
+database: "solenix-backend"
 
 wal_max_size: 32 # MiB
 
