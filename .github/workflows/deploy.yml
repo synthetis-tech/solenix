@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Login to GitLab Registry
-        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login registry.gitlab.com -u ${{ secrets.REGISTRY_USER }} --password-stdin
+        run: echo "${{ secrets.CI_REGISTRY_PASSWORD }}" | docker login registry.gitlab.com -u ${{ secrets.CI_REGISTRY_USER }} --password-stdin
 
       - name: Build and push
         run: |
