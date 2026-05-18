@@ -121,3 +121,14 @@ func (s *Server) Health(_ context.Context, _ *pb.HealthRequest) (*pb.HealthRespo
 func (s *Server) Metrics(_ context.Context, _ *pb.MetricsRequest) (*pb.MetricsResponse, error) {
 	return &pb.MetricsResponse{Metrics: s.db.Metrics()}, nil
 }
+
+func (s *Server) DropMetric(_ context.Context, req *pb.DropMetricRequest) (*pb.DropMetricResponse, error) {
+	if req.Metric == "" {
+		return nil, status.Error(codes.InvalidArgument, "metric is required")
+	}
+	dropped, err := s.db.DropMetric(req.Metric)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "drop metric: %v", err)
+	}
+	return &pb.DropMetricResponse{Dropped: dropped}, nil
+}

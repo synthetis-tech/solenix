@@ -5,11 +5,12 @@ package solenix;
 option go_package = "github.com/synthetis-tech/solenix/api/proto;solenixpb";
 
 service SolenixDB {
-  rpc Push(PushRequest)           returns (PushResponse);
-  rpc Query(QueryRequest)         returns (QueryResponse);
-  rpc Subscribe(SubscribeRequest) returns (stream DataPoint);
-  rpc Health(HealthRequest)       returns (HealthResponse);
-  rpc Metrics(MetricsRequest)     returns (MetricsResponse);
+  rpc Push(PushRequest)             returns (PushResponse);
+  rpc Query(QueryRequest)           returns (QueryResponse);
+  rpc Subscribe(SubscribeRequest)   returns (stream DataPoint);
+  rpc Health(HealthRequest)         returns (HealthResponse);
+  rpc Metrics(MetricsRequest)       returns (MetricsResponse);
+  rpc DropMetric(DropMetricRequest) returns (DropMetricResponse);
 }
 
 // --- Shared ---
@@ -75,4 +76,14 @@ message MetricsRequest {}
 
 message MetricsResponse {
   repeated string metrics = 1;
+}
+
+// --- DropMetric ---
+
+message DropMetricRequest {
+  string metric = 1;
+}
+
+message DropMetricResponse {
+  bool dropped = 1; // false если метрика не существовала
 }

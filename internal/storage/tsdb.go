@@ -530,6 +530,37 @@ func (db *DB) notify(metric string, labels map[string]string, points []model.Poi
 	}
 }
 
+// DropMetric полностью удаляет метрику: flush WAL → удаление chunk-директории → очистка памяти.
+// Возвращает false если метрика не существовала.
+func (db *DB) DropMetric(metric string) (bool, error) {
+	if metric == "" {
+		return false, errors.New("metric is required")
+	}
+
+	metricDir := filepath.Join(db.chunksDir, metric)
+	_, diskErr := os.Stat(metricDir)
+	if !db.metricIdx.has(metric) && os.IsNotExist(diskErr) {
+		return false, nil
+	}
+
+	// Flush WAL so no in-flight records survive a crash after this point.
+	_ = db.flushToChunks()
+
+	if err := os.RemoveAll(metricDir); err != nil && !os.IsNotExist(err) {
+		return false, fmt.Errorf("remove chunks for %q: %w", metric, err)
+	}
+
+	ids := db.metricIdx.drop(metric)
+	for _, id := range ids {
+		sh := db.shardFor(id)
+		sh.mu.Lock()
+		delete(sh.series, id)
+		sh.mu.Unlock()
+	}
+
+	return true, nil
+}
+
 // Metrics возвращает список всех метрик в БД.
 func (db *DB) Metrics() []string {
 	return db.metricIdx.list()
