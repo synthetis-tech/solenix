@@ -572,6 +572,7 @@ func (x *MetricsResponse) GetMetrics() []string {
 type DropMetricRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Metric        string                 `protobuf:"bytes,1,opt,name=metric,proto3" json:"metric,omitempty"`
+	Labels        map[string]string      `protobuf:"bytes,2,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // фильтр по лейблам; пусто = удалить все серии метрики
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -611,6 +612,13 @@ func (x *DropMetricRequest) GetMetric() string {
 		return x.Metric
 	}
 	return ""
+}
+
+func (x *DropMetricRequest) GetLabels() map[string]string {
+	if x != nil {
+		return x.Labels
+	}
+	return nil
 }
 
 type DropMetricResponse struct {
@@ -700,9 +708,13 @@ const file_api_proto_solenix_proto_rawDesc = "" +
 	"\aversion\x18\x02 \x01(\tR\aversion\"\x10\n" +
 	"\x0eMetricsRequest\"+\n" +
 	"\x0fMetricsResponse\x12\x18\n" +
-	"\ametrics\x18\x01 \x03(\tR\ametrics\"+\n" +
+	"\ametrics\x18\x01 \x03(\tR\ametrics\"\xa6\x01\n" +
 	"\x11DropMetricRequest\x12\x16\n" +
-	"\x06metric\x18\x01 \x01(\tR\x06metric\".\n" +
+	"\x06metric\x18\x01 \x01(\tR\x06metric\x12>\n" +
+	"\x06labels\x18\x02 \x03(\v2&.solenix.DropMetricRequest.LabelsEntryR\x06labels\x1a9\n" +
+	"\vLabelsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\".\n" +
 	"\x12DropMetricResponse\x12\x18\n" +
 	"\adropped\x18\x01 \x01(\bR\adropped2\xf6\x02\n" +
 	"\tSolenixDB\x123\n" +
@@ -726,7 +738,7 @@ func file_api_proto_solenix_proto_rawDescGZIP() []byte {
 	return file_api_proto_solenix_proto_rawDescData
 }
 
-var file_api_proto_solenix_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_api_proto_solenix_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_api_proto_solenix_proto_goTypes = []any{
 	(*DataPoint)(nil),          // 0: solenix.DataPoint
 	(*Series)(nil),             // 1: solenix.Series
@@ -744,6 +756,7 @@ var file_api_proto_solenix_proto_goTypes = []any{
 	nil,                        // 13: solenix.Series.LabelsEntry
 	nil,                        // 14: solenix.QueryRequest.LabelsEntry
 	nil,                        // 15: solenix.SubscribeRequest.LabelsEntry
+	nil,                        // 16: solenix.DropMetricRequest.LabelsEntry
 }
 var file_api_proto_solenix_proto_depIdxs = []int32{
 	13, // 0: solenix.Series.labels:type_name -> solenix.Series.LabelsEntry
@@ -752,23 +765,24 @@ var file_api_proto_solenix_proto_depIdxs = []int32{
 	14, // 3: solenix.QueryRequest.labels:type_name -> solenix.QueryRequest.LabelsEntry
 	1,  // 4: solenix.QueryResponse.series:type_name -> solenix.Series
 	15, // 5: solenix.SubscribeRequest.labels:type_name -> solenix.SubscribeRequest.LabelsEntry
-	2,  // 6: solenix.SolenixDB.Push:input_type -> solenix.PushRequest
-	4,  // 7: solenix.SolenixDB.Query:input_type -> solenix.QueryRequest
-	6,  // 8: solenix.SolenixDB.Subscribe:input_type -> solenix.SubscribeRequest
-	7,  // 9: solenix.SolenixDB.Health:input_type -> solenix.HealthRequest
-	9,  // 10: solenix.SolenixDB.Metrics:input_type -> solenix.MetricsRequest
-	11, // 11: solenix.SolenixDB.DropMetric:input_type -> solenix.DropMetricRequest
-	3,  // 12: solenix.SolenixDB.Push:output_type -> solenix.PushResponse
-	5,  // 13: solenix.SolenixDB.Query:output_type -> solenix.QueryResponse
-	0,  // 14: solenix.SolenixDB.Subscribe:output_type -> solenix.DataPoint
-	8,  // 15: solenix.SolenixDB.Health:output_type -> solenix.HealthResponse
-	10, // 16: solenix.SolenixDB.Metrics:output_type -> solenix.MetricsResponse
-	12, // 17: solenix.SolenixDB.DropMetric:output_type -> solenix.DropMetricResponse
-	12, // [12:18] is the sub-list for method output_type
-	6,  // [6:12] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	16, // 6: solenix.DropMetricRequest.labels:type_name -> solenix.DropMetricRequest.LabelsEntry
+	2,  // 7: solenix.SolenixDB.Push:input_type -> solenix.PushRequest
+	4,  // 8: solenix.SolenixDB.Query:input_type -> solenix.QueryRequest
+	6,  // 9: solenix.SolenixDB.Subscribe:input_type -> solenix.SubscribeRequest
+	7,  // 10: solenix.SolenixDB.Health:input_type -> solenix.HealthRequest
+	9,  // 11: solenix.SolenixDB.Metrics:input_type -> solenix.MetricsRequest
+	11, // 12: solenix.SolenixDB.DropMetric:input_type -> solenix.DropMetricRequest
+	3,  // 13: solenix.SolenixDB.Push:output_type -> solenix.PushResponse
+	5,  // 14: solenix.SolenixDB.Query:output_type -> solenix.QueryResponse
+	0,  // 15: solenix.SolenixDB.Subscribe:output_type -> solenix.DataPoint
+	8,  // 16: solenix.SolenixDB.Health:output_type -> solenix.HealthResponse
+	10, // 17: solenix.SolenixDB.Metrics:output_type -> solenix.MetricsResponse
+	12, // 18: solenix.SolenixDB.DropMetric:output_type -> solenix.DropMetricResponse
+	13, // [13:19] is the sub-list for method output_type
+	7,  // [7:13] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_solenix_proto_init() }
@@ -782,7 +796,7 @@ func file_api_proto_solenix_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_solenix_proto_rawDesc), len(file_api_proto_solenix_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   16,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

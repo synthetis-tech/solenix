@@ -126,7 +126,7 @@ func (s *Server) DropMetric(_ context.Context, req *pb.DropMetricRequest) (*pb.D
 	if req.Metric == "" {
 		return nil, status.Error(codes.InvalidArgument, "metric is required")
 	}
-	dropped, err := s.db.DropMetric(req.Metric)
+	dropped, err := s.db.DropMetric(req.Metric, req.Labels)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "drop metric: %v", err)
 	}

@@ -38,7 +38,7 @@ func ChunkTimeRange(path string) (minTS, maxTS int64, err error) {
 // QueryChunks reads points from chunk files for a metric in the time range [from, to].
 // labels is a filter (nil = match any). from/to == 0 means no bound.
 func QueryChunks(chunksDir, metric string, labels map[string]string, from, to int64) ([]model.SeriesResult, error) {
-	metricDir := filepath.Join(chunksDir, sanitizeMetric(metric))
+	metricDir := filepath.Join(chunksDir, SanitizeMetric(metric))
 	entries, err := os.ReadDir(metricDir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -141,6 +141,71 @@ func chunkFilterPoints(points []model.Point, from, to int64) []model.Point {
 	out := make([]model.Point, end-start)
 	copy(out, points[start:end])
 	return out
+}
+
+// DropSeriesFromChunks удаляет из chunk-файлов все серии, совпадающие с labels.
+// Пустой labels = совпадают все серии (полное удаление метрики).
+// Файлы, ставшие пустыми, удаляются; если директория пустеет — тоже удаляется.
+// Возвращает true если что-то было удалено.
+func DropSeriesFromChunks(metricDir string, labels map[string]string) (bool, error) {
+	entries, err := os.ReadDir(metricDir)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+
+	metric := filepath.Base(metricDir)
+	cr := reader{}
+	var anyDropped bool
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".chunk") {
+			continue
+		}
+		path := filepath.Join(metricDir, entry.Name())
+
+		recs, err := cr.readFile(path)
+		if err != nil {
+			return anyDropped, fmt.Errorf("read %s: %w", path, err)
+		}
+
+		var keep []*model.SeriesResult
+		var removed bool
+		for _, rec := range recs {
+			if chunkLabelsMatch(labels, rec.Labels) {
+				removed = true
+			} else {
+				keep = append(keep, &model.SeriesResult{
+					Metric: metric,
+					Labels: rec.Labels,
+					Points: rec.Points,
+				})
+			}
+		}
+
+		if !removed {
+			continue
+		}
+		anyDropped = true
+
+		if len(keep) == 0 {
+			_ = os.Remove(path)
+		} else {
+			if err := writeChunkFile(path, keep); err != nil {
+				return anyDropped, fmt.Errorf("rewrite %s: %w", path, err)
+			}
+		}
+	}
+
+	// Удаляем директорию если она опустела
+	remaining, _ := os.ReadDir(metricDir)
+	if len(remaining) == 0 {
+		_ = os.RemoveAll(metricDir)
+	}
+
+	return anyDropped, nil
 }
 
 const versionRaw byte = 0x01
