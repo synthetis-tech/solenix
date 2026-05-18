@@ -530,35 +530,51 @@ func (db *DB) notify(metric string, labels map[string]string, points []model.Poi
 	}
 }
 
-// DropMetric полностью удаляет метрику: flush WAL → удаление chunk-директории → очистка памяти.
+// DropMetric удаляет серии метрики, совпадающие с labels.
+// Пустой labels = удалить все серии метрики целиком.
 // Возвращает false если метрика не существовала.
-func (db *DB) DropMetric(metric string) (bool, error) {
+func (db *DB) DropMetric(metric string, labels map[string]string) (bool, error) {
 	if metric == "" {
 		return false, errors.New("metric is required")
 	}
 
-	metricDir := filepath.Join(db.chunksDir, metric)
+	metricDir := filepath.Join(db.chunksDir, chunk.SanitizeMetric(metric))
 	_, diskErr := os.Stat(metricDir)
 	if !db.metricIdx.has(metric) && os.IsNotExist(diskErr) {
 		return false, nil
 	}
 
-	// Flush WAL so no in-flight records survive a crash after this point.
+	// Flush WAL: гарантирует что in-flight записи не переживут drop
 	_ = db.flushToChunks()
 
-	if err := os.RemoveAll(metricDir); err != nil && !os.IsNotExist(err) {
-		return false, fmt.Errorf("remove chunks for %q: %w", metric, err)
+	droppedDisk, err := chunk.DropSeriesFromChunks(metricDir, labels)
+	if err != nil {
+		return false, fmt.Errorf("drop from chunks: %w", err)
 	}
 
-	ids := db.metricIdx.drop(metric)
+	droppedMem := db.evictSeriesByLabels(metric, labels)
+
+	return droppedDisk || droppedMem, nil
+}
+
+// evictSeriesByLabels удаляет из памяти серии метрики, совпадающие с labels.
+func (db *DB) evictSeriesByLabels(metric string, labels map[string]string) bool {
+	ids := db.metricIdx.lookup(metric)
+	var found bool
 	for _, id := range ids {
 		sh := db.shardFor(id)
 		sh.mu.Lock()
-		delete(sh.series, id)
-		sh.mu.Unlock()
+		ser, ok := sh.series[id]
+		if ok && labelsMatch(labels, ser.labels) {
+			delete(sh.series, id)
+			found = true
+			sh.mu.Unlock()
+			db.metricIdx.remove(metric, id)
+		} else {
+			sh.mu.Unlock()
+		}
 	}
-
-	return true, nil
+	return found
 }
 
 // Metrics возвращает список всех метрик в БД.

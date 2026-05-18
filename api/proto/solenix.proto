@@ -81,7 +81,8 @@ message MetricsResponse {
 // --- DropMetric ---
 
 message DropMetricRequest {
-  string metric = 1;
+  string              metric = 1;
+  map<string, string> labels = 2; // фильтр по лейблам; пусто = удалить все серии метрики
 }
 
 message DropMetricResponse {

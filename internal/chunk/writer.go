@@ -35,6 +35,20 @@ func NewWriter(dir string) *Writer {
 
 // Write записывает все серии одной метрики в новый numbered chunk файл.
 func (cw *Writer) Write(metric string, series []*model.SeriesResult) error {
+	metricDir := filepath.Join(cw.dir, SanitizeMetric(metric))
+	if err := os.MkdirAll(metricDir, 0o755); err != nil {
+		return fmt.Errorf("mkdir chunk dir %s: %w", metricDir, err)
+	}
+	n, err := nextChunkNum(metricDir)
+	if err != nil {
+		return fmt.Errorf("next chunk num: %w", err)
+	}
+	return writeChunkFile(filepath.Join(metricDir, fmt.Sprintf("%06d.chunk", n)), series)
+}
+
+// writeChunkFile encodes series and atomically writes them to path (tmp → rename).
+// Returns nil without creating a file if there are no non-empty series.
+func writeChunkFile(path string, series []*model.SeriesResult) error {
 	var nonEmpty []*model.SeriesResult
 	for _, ser := range series {
 		if len(ser.Points) > 0 {
@@ -44,18 +58,6 @@ func (cw *Writer) Write(metric string, series []*model.SeriesResult) error {
 	if len(nonEmpty) == 0 {
 		return nil
 	}
-
-	metricDir := filepath.Join(cw.dir, sanitizeMetric(metric))
-	if err := os.MkdirAll(metricDir, 0o755); err != nil {
-		return fmt.Errorf("mkdir chunk dir %s: %w", metricDir, err)
-	}
-
-	n, err := nextChunkNum(metricDir)
-	if err != nil {
-		return fmt.Errorf("next chunk num: %w", err)
-	}
-
-	path := filepath.Join(metricDir, fmt.Sprintf("%06d.chunk", n))
 
 	var minTS int64 = math.MaxInt64
 	var maxTS int64 = math.MinInt64
@@ -84,25 +86,21 @@ func (cw *Writer) Write(metric string, series []*model.SeriesResult) error {
 		body = append(body, compressed...)
 	}
 
-	// Заголовок: magic(4)+version(1)+reserved(3)+min_ts(8)+max_ts(8) = 24 bytes
 	hdr := make([]byte, headerSize)
 	binary.LittleEndian.PutUint32(hdr[0:4], Magic)
 	hdr[4] = version
 	binary.LittleEndian.PutUint64(hdr[8:16], uint64(minTS))
 	binary.LittleEndian.PutUint64(hdr[16:24], uint64(maxTS))
 
-	// CRC покрывает header + body (всё кроме footer)
 	h := crc32.NewIEEE()
 	_, _ = h.Write(hdr)
 	_, _ = h.Write(body)
 	checksum := h.Sum32()
 
-	// Footer: series_count(4) + checksum(4)
 	ftr := make([]byte, footerSize)
 	binary.LittleEndian.PutUint32(ftr[0:4], uint32(len(nonEmpty)))
 	binary.LittleEndian.PutUint32(ftr[4:8], checksum)
 
-	// Атомарная запись: tmp → rename
 	tmp := path + ".tmp"
 	f, err := os.Create(tmp)
 	if err != nil {
@@ -170,7 +168,7 @@ func nextChunkNum(dir string) (uint64, error) {
 	return max + 1, nil
 }
 
-func sanitizeMetric(name string) string {
+func SanitizeMetric(name string) string {
 	return strings.Map(func(r rune) rune {
 		switch r {
 		case '/', '\\', ':', '*', '?', '"', '<', '>', '|':
