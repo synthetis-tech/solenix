@@ -554,6 +554,13 @@ func (db *DB) DropMetric(metric string, labels map[string]string) (bool, error) 
 
 	droppedMem := db.evictSeriesByLabels(metric, labels)
 
+	// flushToChunks evicts series from shards (but keeps IDs in metricIdx).
+	// If DropSeriesFromChunks deleted the directory (all series gone), the index
+	// still holds stale IDs — clean them up so the metric disappears from Metrics().
+	if _, statErr := os.Stat(metricDir); os.IsNotExist(statErr) {
+		db.metricIdx.drop(metric)
+	}
+
 	return droppedDisk || droppedMem, nil
 }
 
